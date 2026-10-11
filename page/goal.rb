@@ -1,11 +1,9 @@
-require "./ranking.rb"
+# [移植] ランキング（外部サーバーへの送信）は一旦なし。ranking.rb は読み込まない
 
 
 def goal()
-  if $ranking_players == nil && !$server_false
-    ranking()
-  end
-  goalbackgroundImage = Image.load('image\goalbackground.jpg')
+  # [移植] ランキングは一旦なし（ranking() を呼ばない）
+  goalbackgroundImage = Image.load('image/goalbackground.jpg')
   Window.draw_scale(0, 0, goalbackgroundImage, 1, 0.59, 0, 0)
 
   font = Font.new(100, font_name="HGP創英角ﾎﾟｯﾌﾟ体")
@@ -14,7 +12,7 @@ def goal()
   Window.draw_font(420, Window.height / 2 - 50, "score: #{$score}", font, {:color => [100, 100, 255],:z => 120})
 
   if $ranking_players != nil
-    ranking_image = Image.load('image\ranking.png')
+    ranking_image = Image.load('image/ranking.png')
     Window.draw_scale(0, 50, ranking_image, 1, 1, 0, 0)
     font = Font.new(25)
     $ranking_players.each_with_index do |player, index|
