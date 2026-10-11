@@ -1,41 +1,92 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# 開発用サーバー。http://localhost:3000 でゲームを開ける。
-# dist/game.rb へのリクエストのたびにビルドし直すので、.rb を編集したらリロードするだけでよい。
-require 'bundler/inline'
-
-gemfile do
-  source 'https://rubygems.org'
-  gem 'webrick'
-end
-
+# 開発・デモ用のサーバー。http://localhost:3000 でゲームを開ける。
+#
+# - gem を使わず Ruby の標準ライブラリ（socket）だけで動く。会場でネットワークがなくても起動できる
+# - dist/game.rb へのリクエストのたびにビルドし直すので、.rb を編集したらリロードするだけで反映される
+#
+#   ruby script/server              # ポート 3000
+#   PORT=8080 ruby script/server    # ポートを変える
+require 'socket'
+require 'uri'
 require_relative 'build'
 
-root = GameBuild::ROOT
-port = (ENV['PORT'] || 3000).to_i
+ROOT = GameBuild::ROOT
+PORT = (ENV['PORT'] || 3000).to_i
 
-class NoCacheFileHandler < WEBrick::HTTPServlet::FileHandler
-  def do_GET(req, res) = super.tap { res['Cache-Control'] = 'no-store' }
+MIME_TYPES = {
+  '.html' => 'text/html; charset=utf-8',
+  '.js'   => 'application/javascript; charset=utf-8',
+  '.rb'   => 'text/plain; charset=utf-8',
+  '.md'   => 'text/plain; charset=utf-8',
+  '.wasm' => 'application/wasm',
+  '.png'  => 'image/png',
+  '.jpg'  => 'image/jpeg',
+  '.jpeg' => 'image/jpeg',
+  '.gif'  => 'image/gif',
+  '.svg'  => 'image/svg+xml',
+  '.wav'  => 'audio/wav',
+  '.mp3'  => 'audio/mpeg',
+  '.ogg'  => 'audio/ogg',
+  '.ttf'  => 'font/ttf',
+  '.otf'  => 'font/otf',
+  '.woff' => 'font/woff',
+  '.woff2' => 'font/woff2',
+  '.ico'  => 'image/x-icon',
+}.freeze
+
+STATUS_TEXT = { 200 => 'OK', 404 => 'Not Found', 405 => 'Method Not Allowed', 500 => 'Internal Server Error' }.freeze
+
+def respond(client, status, type, body, head_only: false)
+  client.write "HTTP/1.1 #{status} #{STATUS_TEXT[status]}\r\n" \
+               "Content-Type: #{type}\r\n" \
+               "Content-Length: #{body.bytesize}\r\n" \
+               "Cache-Control: no-store\r\n" \
+               "Connection: close\r\n\r\n"
+  client.write body unless head_only
 end
 
-server = WEBrick::HTTPServer.new(Port: port, BindAddress: '127.0.0.1')
-server.config[:MimeTypes]['wasm'] = 'application/wasm'
-server.config[:MimeTypes]['rb']   = 'text/plain; charset=utf-8'
+def handle(client)
+  request_line = client.gets or return
+  method, target, = request_line.split(' ', 3)
+  # ヘッダーは使わないので読み捨てる
+  while (line = client.gets) && line != "\r\n"; end
 
-server.mount_proc('/dist/game.rb') do |_req, res|
-  res['Content-Type']  = 'text/plain; charset=utf-8'
-  res['Cache-Control'] = 'no-store'
-  begin
-    res.body = GameBuild.build
-  rescue => e
-    res.status = 500
-    res.body = "# build error: #{e.message}\n"
-    warn e.full_message
+  unless %w[GET HEAD].include?(method)
+    return respond(client, 405, 'text/plain; charset=utf-8', "Method Not Allowed\n")
   end
-end
-server.mount('/', NoCacheFileHandler, root)
+  head_only = method == 'HEAD'
 
-puts "http://localhost:#{port}"
-trap('INT') { server.shutdown }
-server.start
+  path = URI.decode_www_form_component(target.split('?', 2).first)
+  path = '/index.html' if path == '/'
+
+  if path == '/dist/game.rb'
+    begin
+      return respond(client, 200, MIME_TYPES['.rb'], GameBuild.build, head_only: head_only)
+    rescue => e
+      warn e.full_message
+      return respond(client, 500, 'text/plain; charset=utf-8', "# build error: #{e.message}\n", head_only: head_only)
+    end
+  end
+
+  file = File.expand_path(".#{path}", ROOT)
+  # ROOT の外（../ など）は返さない
+  unless (file == ROOT || file.start_with?("#{ROOT}/")) && File.file?(file)
+    return respond(client, 404, 'text/plain; charset=utf-8', "Not Found: #{path}\n", head_only: head_only)
+  end
+
+  type = MIME_TYPES.fetch(File.extname(file).downcase, 'application/octet-stream')
+  respond(client, 200, type, File.binread(file), head_only: head_only)
+rescue Errno::EPIPE, Errno::ECONNRESET
+  # ブラウザが途中で接続を切った
+ensure
+  client.close
+end
+
+server = TCPServer.new('127.0.0.1', PORT)
+puts "http://localhost:#{PORT}"
+trap('INT') { exit }
+loop do
+  Thread.start(server.accept) { |client| handle(client) }
+end

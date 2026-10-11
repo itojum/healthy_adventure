@@ -38,7 +38,7 @@ Ruby合宿2024春 Team5 のゲーム（[rc2024sp_team5](https://github.com/itoju
 | `vendor/picodx.rb` | PicoDX（itojum/picodx@`7b230b8` のビルド）を同梱 | 会場でネットワークに頼らず動かすため |
 | `vendor/picoruby/` | PicoRuby.wasm 4.0.2（`@picoruby/wasm-wasi`）を同梱 | 同上 |
 | `index.html` | 1024x700 の canvas を、画面サイズに合わせて縦横比を保ったまま拡大・縮小 | プロジェクタなど、どんな画面でも全体を表示するため。マウス座標は PicoDX が内部解像度に換算する |
-| `script/server` | 開発用サーバー。`dist/game.rb` へのアクセスのたびにビルドし直す | `.rb` を編集したらリロードするだけで確認できるようにするため |
+| `script/server` | 開発・デモ用サーバー。Ruby の標準ライブラリ（socket）だけで動き、`dist/game.rb` へのアクセスのたびにビルドし直す | gem を取得できない会場でも起動できるようにし、`.rb` を編集したらリロードするだけで確認できるようにするため |
 
 ## 性能の推移（プレイ画面）
 

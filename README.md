@@ -15,17 +15,14 @@ Ruby合宿2024春 Team5 が DXRuby で作ったゲームを、[PicoRuby.wasm](ht
 ## 動かし方
 
 ```bash
-ruby script/server   # http://localhost:3000 を開く（初回は webrick gem を取得します）
+ruby script/server   # http://localhost:3000 を開く
 ```
 
-`dist/game.rb` へのアクセスのたびにビルドし直すので、`.rb` を編集したらリロードするだけで反映されます。
+- gem は使わず、Ruby の標準ライブラリだけで動きます（会場でネットワークがなくても起動できます）
+- `dist/game.rb` へのアクセスのたびにビルドし直すので、`.rb` を編集したらリロードするだけで反映されます
+- ポートを変えるときは `PORT=8080 ruby script/server`
 
-サーバーを使わずに静的ファイルとして置く場合は、先にビルドしてから任意の静的サーバーで配信します。
-
-```bash
-ruby script/build.rb          # dist/game.rb を生成
-python3 -m http.server 3000   # など
-```
+GitHub Pages などに静的ファイルとして置く場合は、先に `ruby script/build.rb` で `dist/game.rb` を生成してから、リポジトリ一式を配置します。
 
 ## 構成
 
