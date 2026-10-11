@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# 開発用サーバー。http://localhost:3000 でゲームを開ける。
+# dist/game.rb へのリクエストのたびにビルドし直すので、.rb を編集したらリロードするだけでよい。
+require 'bundler/inline'
+
+gemfile do
+  source 'https://rubygems.org'
+  gem 'webrick'
+end
+
+require_relative 'build'
+
+root = GameBuild::ROOT
+port = (ENV['PORT'] || 3000).to_i
+
+class NoCacheFileHandler < WEBrick::HTTPServlet::FileHandler
+  def do_GET(req, res) = super.tap { res['Cache-Control'] = 'no-store' }
+end
+
+server = WEBrick::HTTPServer.new(Port: port, BindAddress: '127.0.0.1')
+server.config[:MimeTypes]['wasm'] = 'application/wasm'
+server.config[:MimeTypes]['rb']   = 'text/plain; charset=utf-8'
+
+server.mount_proc('/dist/game.rb') do |_req, res|
+  res['Content-Type']  = 'text/plain; charset=utf-8'
+  res['Cache-Control'] = 'no-store'
+  begin
+    res.body = GameBuild.build
+  rescue => e
+    res.status = 500
+    res.body = "# build error: #{e.message}\n"
+    warn e.full_message
+  end
+end
+server.mount('/', NoCacheFileHandler, root)
+
+puts "http://localhost:#{port}"
+trap('INT') { server.shutdown }
+server.start
