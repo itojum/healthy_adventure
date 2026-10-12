@@ -1,10 +1,8 @@
-require "./ranking.rb"
+# [移植] ランキング（外部サーバーへの送信）は一旦なし。ranking.rb は読み込まない
 
 
 def goal()
-  if $ranking_players == nil && !$server_false
-    ranking()
-  end
+  # [移植] ランキングは一旦なし（ranking() を呼ばない）
   goalbackgroundImage = Image.load('image\goalbackground.jpg')
   Window.draw_scale(0, 0, goalbackgroundImage, 1, 0.59, 0, 0)
 
