@@ -21,6 +21,11 @@ module GameBuild
     'dxruby' => 'PicoDX を先に読み込むので不要',
   }.freeze
 
+  # PicoRuby にない標準ライブラリを、このゲームで使う分だけ実装したファイルに置き換える
+  COMPAT = {
+    'set' => 'compat/set.rb',
+  }.freeze
+
   REQUIRE_RE = /\A(\s*)require(_relative)?\s*\(?\s*(["'])([^"']+)\3\s*\)?\s*(#.*)?\z/
 
   module_function
@@ -55,6 +60,12 @@ module GameBuild
       indent, rel, name = m[1], m[2], m[4]
       if SKIPPED.key?(name)
         out << "#{indent}# [build] require '#{name}' を除去: #{SKIPPED[name]}\n"
+        next
+      end
+
+      if COMPAT.key?(name)
+        out << expand(File.join(ROOT, COMPAT[name]), loaded)
+        out << "# ==== (#{relative(path)} に戻る) ====\n"
         next
       end
 
