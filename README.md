@@ -20,7 +20,7 @@ bundle exec ruby script/server    # http://localhost:3001 を開く
 ```
 
 - `index.html` は静的なページですが、ファイルを直接開く（`file://`）と PicoRuby.wasm の読み込みがブラウザに止められるので、HTTP で配信します
-- 会場でネットワークがない場合に備えて、`bundle install` は事前に済ませておいてください
+- PicoDX と PicoRuby.wasm は CDN（jsDelivr）から読み込むので、手元で動かすときもネットワークが必要です
 - `dist/game.rb` へのアクセスのたびにビルドし直すので、`.rb` を編集したらリロードするだけで反映されます
 - 既定のポートは、PicoDX の開発サーバー（3000）と重ならないよう 3001 です。変えるときは `PORT=8080 bundle exec ruby script/server`
 
@@ -35,9 +35,7 @@ compat/                         PicoRuby にない Set と、Range を受け付�
 script/build.rb                 require をたどって dist/game.rb の 1 ファイルにまとめる
 script/server                   開発・デモ用サーバー（WEBrick）
 Gemfile                         webrick（script/server で使う）
-vendor/picodx.rb                PicoDX（itojum/picodx@7b230b8 のビルド）
-vendor/picoruby/                PicoRuby.wasm 4.0.2
-index.html                      ゲームを表示するページ
+index.html                      ゲームを表示するページ。PicoDX 2.0.0 と PicoRuby.wasm 4.0.2 を jsDelivr から読み込む
 ```
 
 ## メンバー（Ruby合宿2024春 Team5）

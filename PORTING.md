@@ -44,7 +44,7 @@ Ruby合宿2024春 Team5 のゲーム（[rc2024sp_team5](https://github.com/itoju
   `<script type="text/ruby">` をファイルごとに並べても、それぞれが**別タスクとして同時に動く**ので代わりにならない
   （前のファイルの `Image.load` の `await` を待たずに次のファイルが始まる）
 - **直し方**：`script/build.rb` で `main.rb` から `require` をたどり、`require` の行をそのファイルの中身で置き換えて、
-  PicoDX と合わせた 1 ファイル（`dist/game.rb`）にする。原作のファイル構成と `require` はそのまま残せる
+  1 ファイル（`dist/game.rb`）にする。原作のファイル構成と `require` はそのまま残せる。PicoDX は CDN から別の `<script>` で読み込む
 
 ### 2. `Set` がない（#3）
 
@@ -101,9 +101,7 @@ Ruby合宿2024春 Team5 のゲーム（[rc2024sp_team5](https://github.com/itoju
 
 | ファイル | 内容 |
 | --- | --- |
-| `index.html` | 1024x700 の canvas を、画面サイズに合わせて縦横比を保ったまま拡大・縮小する |
-| `vendor/picodx.rb` | PicoDX（itojum/picodx@`7b230b8` のビルド）。会場でネットワークに頼らないよう同梱 |
-| `vendor/picoruby/` | PicoRuby.wasm 4.0.2（`@picoruby/wasm-wasi`）。同上 |
+| `index.html` | 1024x700 の canvas を、画面サイズに合わせて縦横比を保ったまま拡大・縮小する。PicoDX（npm の `picodx@2.0.0`）と PicoRuby.wasm（`@picoruby/wasm-wasi@4.0.2`）は jsDelivr から読み込む |
 | `script/server`, `Gemfile` | WEBrick で配信するサーバー（ポート 3001、`bundle install` で webrick を入れる）。`file://` で開くと PicoRuby.wasm の読み込みが止められるため HTTP で配信する。`dist/game.rb` へのアクセスのたびにビルドし直す。`localhost` の IPv4 と IPv6 の両方で待ち受け、ポートが使われていたら止まる |
 | `script/build.rb` | `require` をたどって `dist/game.rb` にまとめるビルド |
 
