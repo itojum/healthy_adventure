@@ -23,6 +23,7 @@ Ruby合宿2024春 Team5 のゲーム（[rc2024sp_team5](https://github.com/itoju
 | #8 | `port/07-skip-offscreen-blocks` | （約 31〜39fps） | 画面の右外のブロックを描かない | `page/gameplay.rb` |
 | #9 | `port/08-fast-rand` | （約 30〜50fps） | `rand` を Ruby の xorshift に置き換え | なし |
 | #10 | `port/09-docs` | ─ | この移植メモと README | なし |
+| #16 | `port/10-pages` | ─ | GitHub Pages で公開する | なし |
 
 #15 の差分が原作そのものです。原作のコードからの変更は `git diff port/original port/09-docs -- main.rb page class init` で見られます。
 
@@ -97,13 +98,14 @@ Ruby合宿2024春 Team5 のゲーム（[rc2024sp_team5](https://github.com/itoju
 - **Ruby のコード自体も CRuby よりかなり遅い**。総当たりの衝突判定は、近くだけを調べる工夫が必要になる
 - 逆に、**PicoDX の互換性が高いので、ゲームのロジックはほぼそのまま動く**。原作の変更は 4 ファイル・追加 15 行／削除 12 行で済んだ
 
-## 移植のための土台（`port/00-base` と #2 で追加。原作には関係しないもの）
+## 移植のための土台（#13・#2・#16 で追加。原作には関係しないもの）
 
 | ファイル | 内容 |
 | --- | --- |
 | `index.html` | 1024x700 の canvas を、画面サイズに合わせて縦横比を保ったまま拡大・縮小する。PicoDX（npm の `picodx@2.0.0`）と PicoRuby.wasm（`@picoruby/wasm-wasi@4.0.2`）は jsDelivr から読み込む |
 | `script/server`, `Gemfile` | WEBrick で配信するサーバー（ポート 3001、`bundle install` で webrick を入れる）。`file://` で開くと PicoRuby.wasm の読み込みが止められるため HTTP で配信する。`dist/game.rb` へのアクセスのたびにビルドし直す。`localhost` の IPv4 と IPv6 の両方で待ち受け、ポートが使われていたら止まる |
 | `script/build.rb` | `require` をたどって `dist/game.rb` にまとめるビルド |
+| `.github/workflows/pages.yml` | `main` に push したら `dist/game.rb` をビルドし、ブラウザが読み込むファイルだけを GitHub Pages に公開する（#16） |
 
 ## PicoDX 側で見つかった問題（PicoDX のリポジトリには未反映）
 

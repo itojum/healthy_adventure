@@ -1,0 +1,55 @@
+# main に push したら、ゲームをビルドして GitHub Pages に公開する。
+# 公開するのはブラウザが読み込むファイルだけ（index.html、ビルドした dist/game.rb、画像、BGM）。
+# 初回だけ、リポジトリの Settings → Pages で Source を「GitHub Actions」にしておく必要がある。
+name: GitHub Pages に公開する
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: ゲームを 1 ファイルにまとめる
+        run: ruby script/build.rb
+
+      - name: 公開するファイルを集める
+        run: |
+          mkdir -p _site/dist _site/page
+          cp index.html _site/
+          cp dist/game.rb _site/dist/
+          cp -r image _site/
+          cp -r page/bgm _site/page/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
