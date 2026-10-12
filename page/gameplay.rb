@@ -25,12 +25,14 @@ end
 
 def play()
   # blocks処理
+  screen_right = Window.width
   $blocks.each do |block|
     block.update()
     if block.checkOutside
       $blocks.delete(block)
     end
-    block.draw()
+    # [移植] 画面の右外にあるブロックは描かない（描画の予約だけでも PicoRuby では重いため）
+    block.draw() if block.x < screen_right
   end
   # [移植] 近くのブロックだけを判定できるよう、ブロックを列ごとに振り分ける
   build_block_grid($blocks)
