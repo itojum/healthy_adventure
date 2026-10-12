@@ -27,9 +27,9 @@
 </head>
 <body>
   <canvas id="game" width="1024" height="700"></canvas>
-  <!-- PicoDX（CDN）を読み込んでから、ゲームの main.rb を読み込む -->
+  <!-- PicoDX（CDN）を読み込んでから、script/build.rb で 1 ファイルにまとめたゲーム本体を読み込む -->
   <script type="text/ruby" src="https://cdn.jsdelivr.net/npm/picodx@2.0.0/lib/picodx.rb"></script>
-  <script type="text/ruby" src="main.rb"></script>
+  <script type="text/ruby" src="dist/game.rb"></script>
   <!-- PicoRuby.wasm（CDN）。上の text/ruby を順に実行する -->
   <script src="https://cdn.jsdelivr.net/npm/@picoruby/wasm-wasi@4.0.2/dist/init.iife.js"></script>
 </body>

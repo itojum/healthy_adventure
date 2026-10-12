@@ -3,13 +3,15 @@
 
 # 開発・デモ用のサーバー。index.html は静的なページだが、file:// で直接開くと
 # PicoRuby.wasm の読み込みがブラウザに止められるので、HTTP で配信する必要がある。
+# dist/game.rb へのリクエストのたびにビルドし直すので、.rb を編集したらリロードするだけで反映される。
 #
 #   bundle install                          # 最初に 1 回（webrick を入れる）
 #   bundle exec ruby script/server          # http://localhost:3001
 #   PORT=8080 bundle exec ruby script/server
 require 'webrick'
+require_relative 'build'
 
-ROOT = File.expand_path('..', __dir__)
+ROOT = GameBuild::ROOT
 # PicoDX の開発サーバー（3000）と重ならないように 3001 にする
 PORT = (ENV['PORT'] || 3001).to_i
 
@@ -31,6 +33,16 @@ rescue Errno::EADDRINUSE
 end
 
 server.config[:MimeTypes]['rb']   = 'text/plain; charset=utf-8'
+
+# dist/game.rb はファイルを返さず、そのたびに main.rb からビルドした内容を返す
+server.mount_proc('/dist/game.rb') do |_req, res|
+  res['Content-Type'] = 'text/plain; charset=utf-8'
+  res.body = GameBuild.build
+rescue => e
+  warn e.full_message
+  res.status = 500
+  res.body = "# build error: #{e.message}\n"
+end
 
 puts "http://localhost:#{PORT}"
 trap('INT') { server.shutdown }
