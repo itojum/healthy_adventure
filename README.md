@@ -15,12 +15,14 @@ Ruby合宿2024春 Team5 が DXRuby で作ったゲームを、[PicoRuby.wasm](ht
 ## 動かし方
 
 ```bash
-ruby script/server   # http://localhost:3001 を開く
+bundle install                    # 最初に 1 回（webrick を入れる）
+bundle exec ruby script/server    # http://localhost:3001 を開く
 ```
 
-- gem は使わず、Ruby の標準ライブラリだけで動きます（会場でネットワークがなくても起動できます）
+- `index.html` は静的なページですが、ファイルを直接開く（`file://`）と PicoRuby.wasm の読み込みがブラウザに止められるので、HTTP で配信します
+- 会場でネットワークがない場合に備えて、`bundle install` は事前に済ませておいてください
 - `dist/game.rb` へのアクセスのたびにビルドし直すので、`.rb` を編集したらリロードするだけで反映されます
-- 既定のポートは、PicoDX の開発サーバー（3000）と重ならないよう 3001 です。変えるときは `PORT=8080 ruby script/server`
+- 既定のポートは、PicoDX の開発サーバー（3000）と重ならないよう 3001 です。変えるときは `PORT=8080 bundle exec ruby script/server`
 
 GitHub Pages などに静的ファイルとして置く場合は、先に `ruby script/build.rb` で `dist/game.rb` を生成してから、リポジトリ一式を配置します。
 
@@ -31,7 +33,8 @@ main.rb, page/, class/, init/   ゲーム本体（原作のファイル構成の
 init/block_grid.rb              移植で追加した、衝突判定を近くのブロックに絞る仕組み
 compat/                         PicoRuby にない Set と、Range を受け付ける速い rand
 script/build.rb                 require をたどって dist/game.rb の 1 ファイルにまとめる
-script/server                   開発・デモ用サーバー
+script/server                   開発・デモ用サーバー（WEBrick）
+Gemfile                         webrick（script/server で使う）
 vendor/picodx.rb                PicoDX（itojum/picodx@7b230b8 のビルド）
 vendor/picoruby/                PicoRuby.wasm 4.0.2
 index.html                      ゲームを表示するページ

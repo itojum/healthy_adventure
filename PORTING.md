@@ -104,7 +104,7 @@ Ruby合宿2024春 Team5 のゲーム（[rc2024sp_team5](https://github.com/itoju
 | `index.html` | 1024x700 の canvas を、画面サイズに合わせて縦横比を保ったまま拡大・縮小する |
 | `vendor/picodx.rb` | PicoDX（itojum/picodx@`7b230b8` のビルド）。会場でネットワークに頼らないよう同梱 |
 | `vendor/picoruby/` | PicoRuby.wasm 4.0.2（`@picoruby/wasm-wasi`）。同上 |
-| `script/server` | Ruby の標準ライブラリだけで動くサーバー（ポート 3001）。`dist/game.rb` へのアクセスのたびにビルドし直す。IPv4 と IPv6 の両方で待ち受け、ポートが使われていたら止まる |
+| `script/server`, `Gemfile` | WEBrick で配信するサーバー（ポート 3001、`bundle install` で webrick を入れる）。`file://` で開くと PicoRuby.wasm の読み込みが止められるため HTTP で配信する。`dist/game.rb` へのアクセスのたびにビルドし直す。`localhost` の IPv4 と IPv6 の両方で待ち受け、ポートが使われていたら止まる |
 | `script/build.rb` | `require` をたどって `dist/game.rb` にまとめるビルド |
 
 ## PicoDX 側で見つかった問題（PicoDX のリポジトリには未反映）
