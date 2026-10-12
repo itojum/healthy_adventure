@@ -26,13 +26,17 @@ module GameBuild
     'set' => 'compat/set.rb',
   }.freeze
 
+  # 組み込みメソッドの違いを埋めるため、ゲーム本体より前に必ず読み込むファイル
+  PRELUDE = %w[compat/kernel.rb].freeze
+
   REQUIRE_RE = /\A(\s*)require(_relative)?\s*\(?\s*(["'])([^"']+)\3\s*\)?\s*(#.*)?\z/
 
   module_function
 
   def build
     loaded = []
-    body = expand(File.join(ROOT, ENTRY), loaded)
+    prelude = PRELUDE.map { |f| expand(File.join(ROOT, f), loaded) }.join
+    body = prelude + expand(File.join(ROOT, ENTRY), loaded)
     header = "# このファイルは script/build.rb が生成したものです。直接編集しないでください。\n" \
              "# 元のファイル: #{loaded.map { |f| relative(f) }.join(', ')}\n"
     header + body
