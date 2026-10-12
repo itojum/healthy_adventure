@@ -4,6 +4,7 @@ require './class/player.rb'
 require './class/goal.rb'
 require './init/block.rb'
 require './init/enemy.rb'
+require './init/block_grid.rb'
 
 $font = Font.new(25)
 
@@ -31,11 +32,13 @@ def play()
     end
     block.draw()
   end
+  # [移植] 近くのブロックだけを判定できるよう、ブロックを列ごとに振り分ける
+  build_block_grid($blocks)
   
   # enemy処理
   $enemys.each do |enemy|
     enemy.move()
-    enemy.hitBlock($blocks)
+    enemy.hitBlock(nearby_blocks(enemy))  # [移植] 全ブロック → 近くのブロック
     $enemys.delete(enemy) if enemy.outside()
 
     hit_bullet = enemy.hit($bullets)
@@ -62,7 +65,7 @@ def play()
     next if bullet == nil
 
     bullet.update()
-    if bullet.hitBlock($blocks.to_a) || bullet.checkOutside()
+    if bullet.hitBlock(nearby_blocks(bullet)) || bullet.checkOutside()  # [移植] 全ブロック → 近くのブロック
       $bullets.delete(bullet)
     end
     bullet.draw()
@@ -73,7 +76,7 @@ def play()
   $page = 4 if $goal.goal($player)
 
   $player.move()
-  $player.hitBlock($blocks)
+  $player.hitBlock(nearby_blocks($player))  # [移植] 全ブロック → 近くのブロック
   if $player.hit($enemys.to_a.concat($bullets.select{|e| e}.select{|e| e.isEnemy()})) || $player.outside()
     $page = 3
   end
