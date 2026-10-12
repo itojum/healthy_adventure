@@ -1,0 +1,110 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# 開発・デモ用のサーバー。http://localhost:3001 でゲームを開ける。
+#
+# - gem を使わず Ruby の標準ライブラリ（socket）だけで動く。会場でネットワークがなくても起動できる
+#
+#   ruby script/server              # ポート 3001（PicoDX の開発サーバーの 3000 と重ならないように）
+#   PORT=8080 ruby script/server    # ポートを変える
+require 'socket'
+require 'uri'
+
+ROOT = File.expand_path('..', __dir__)
+PORT = (ENV['PORT'] || 3001).to_i
+
+MIME_TYPES = {
+  '.html' => 'text/html; charset=utf-8',
+  '.js'   => 'application/javascript; charset=utf-8',
+  '.rb'   => 'text/plain; charset=utf-8',
+  '.md'   => 'text/plain; charset=utf-8',
+  '.wasm' => 'application/wasm',
+  '.png'  => 'image/png',
+  '.jpg'  => 'image/jpeg',
+  '.jpeg' => 'image/jpeg',
+  '.gif'  => 'image/gif',
+  '.svg'  => 'image/svg+xml',
+  '.wav'  => 'audio/wav',
+  '.mp3'  => 'audio/mpeg',
+  '.ogg'  => 'audio/ogg',
+  '.ttf'  => 'font/ttf',
+  '.otf'  => 'font/otf',
+  '.woff' => 'font/woff',
+  '.woff2' => 'font/woff2',
+  '.ico'  => 'image/x-icon',
+}.freeze
+
+STATUS_TEXT = { 200 => 'OK', 404 => 'Not Found', 405 => 'Method Not Allowed', 500 => 'Internal Server Error' }.freeze
+
+def respond(client, status, type, body, head_only: false)
+  client.write "HTTP/1.1 #{status} #{STATUS_TEXT[status]}\r\n" \
+               "Content-Type: #{type}\r\n" \
+               "Content-Length: #{body.bytesize}\r\n" \
+               "Cache-Control: no-store\r\n" \
+               "Connection: close\r\n\r\n"
+  client.write body unless head_only
+end
+
+# 特定のパスに、ファイルの代わりに生成した内容を返すときに使う（{ "/path" => -> { [type, body] } }）
+DYNAMIC = {}
+
+def handle(client)
+  request_line = client.gets or return
+  method, target, = request_line.split(' ', 3)
+  # ヘッダーは使わないので読み捨てる
+  while (line = client.gets) && line != "\r\n"; end
+
+  unless %w[GET HEAD].include?(method)
+    return respond(client, 405, 'text/plain; charset=utf-8', "Method Not Allowed\n")
+  end
+  head_only = method == 'HEAD'
+
+  path = URI.decode_www_form_component(target.split('?', 2).first)
+  path = '/index.html' if path == '/'
+
+  if (generate = DYNAMIC[path])
+    begin
+      type, body = generate.call
+      return respond(client, 200, type, body, head_only: head_only)
+    rescue => e
+      warn e.full_message
+      return respond(client, 500, 'text/plain; charset=utf-8', "# error: #{e.message}\n", head_only: head_only)
+    end
+  end
+
+  file = File.expand_path(".#{path}", ROOT)
+  # ROOT の外（../ など）は返さない
+  unless (file == ROOT || file.start_with?("#{ROOT}/")) && File.file?(file)
+    return respond(client, 404, 'text/plain; charset=utf-8', "Not Found: #{path}\n", head_only: head_only)
+  end
+
+  type = MIME_TYPES.fetch(File.extname(file).downcase, 'application/octet-stream')
+  respond(client, 200, type, File.binread(file), head_only: head_only)
+rescue Errno::EPIPE, Errno::ECONNRESET
+  # ブラウザが途中で接続を切った
+ensure
+  client.close
+end
+
+# ブラウザは localhost を IPv6（::1）で開くことがあるので、IPv4 と IPv6 の両方で待ち受ける。
+# 片方だけで待ち受けると、同じポートで別のサーバー（PicoDX の開発サーバーなど）が動いていても
+# 起動できてしまい、ブラウザがそちらのページを表示する。
+servers = []
+[['127.0.0.1', true], ['::1', false]].each do |host, required|
+  servers << TCPServer.new(host, PORT)
+rescue Errno::EADDRINUSE
+  servers.each(&:close)
+  abort "ポート #{PORT} は別のサーバーが使っています（PicoDX の開発サーバーなど）。\n" \
+        "そのサーバーを止めるか、PORT=#{PORT + 1} ruby script/server のように別のポートで起動してください。"
+rescue Errno::EADDRNOTAVAIL, Errno::EAFNOSUPPORT
+  raise if required # IPv6 が使えない環境なら IPv4 だけで動かす
+end
+
+puts "http://localhost:#{PORT}"
+trap('INT') { exit }
+servers.each do |server|
+  Thread.new do
+    loop { Thread.start(server.accept) { |client| handle(client) } }
+  end
+end
+sleep
