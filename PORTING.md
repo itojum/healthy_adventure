@@ -6,14 +6,14 @@ Ruby合宿2024春 Team5 のゲーム（[rc2024sp_team5](https://github.com/itoju
 
 ## 進め方
 
-まず PicoDX だけが動く最小構成（`port/00-base`、#13）を用意し、そこに原作を無変更のまま載せました（#12）。
+まず PicoDX だけが動く最小構成（`port/00-base`、#13）を用意し、そこに原作を無変更のまま載せました（#15）。
 原作を載せた時点では動かないので、その上に、動かない原因を 1 つずつ直すブランチをスタック PR として積みました。
 各 PR は「直す前に何が起きていたか」と「直した後どうなったか」を、ブラウザで実際に動かして確かめています。
 
 | PR | ブランチ | 直す前に起きていたこと | 直したこと | 原作の変更 |
 | --- | --- | --- | --- | --- |
 | #13 | `port/00-base` | ─ | PicoDX の最小構成（矢印キーで四角が動く） | ─ |
-| #12 | `port/original` | ─ | 原作を無変更のまま載せる（`require 'dxruby'` で止まる） | ─ |
+| #15 | `port/original` | ─ | 原作を無変更のまま載せる（`require 'dxruby'` で止まる） | ─ |
 | #2 | `port/01-require` | `require 'dxruby'` で `LoadError` | `require` をたどって 1 ファイルにまとめるビルド | なし |
 | #3 | `port/02-set` | `require 'set'` で `LoadError` | ゲームで使う分だけの `Set` を用意 | なし |
 | #4 | `port/03-ranking` | `require 'net/http'` で `LoadError` | ランキングを一旦外す | `page/goal.rb` |
@@ -24,7 +24,7 @@ Ruby合宿2024春 Team5 のゲーム（[rc2024sp_team5](https://github.com/itoju
 | #9 | `port/08-fast-rand` | （約 30〜50fps） | `rand` を Ruby の xorshift に置き換え | なし |
 | #10 | `port/09-docs` | ─ | この移植メモと README | なし |
 
-#12 の差分が原作そのものです。原作のコードからの変更は `git diff port/original port/09-docs -- main.rb page class init` で見られます。
+#15 の差分が原作そのものです。原作のコードからの変更は `git diff port/original port/09-docs -- main.rb page class init` で見られます。
 
 ## 結果
 
