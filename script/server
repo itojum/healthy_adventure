@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# 開発・デモ用のサーバー。index.html は静的なページだが、file:// で直接開くと
+# PicoRuby.wasm の読み込みがブラウザに止められるので、HTTP で配信する必要がある。
+#
+#   bundle install                          # 最初に 1 回（webrick を入れる）
+#   bundle exec ruby script/server          # http://localhost:3001
+#   PORT=8080 bundle exec ruby script/server
+require 'webrick'
+
+ROOT = File.expand_path('..', __dir__)
+# PicoDX の開発サーバー（3000）と重ならないように 3001 にする
+PORT = (ENV['PORT'] || 3001).to_i
+
+begin
+  # localhost が指す 127.0.0.1 と ::1 の両方で待ち受ける。どちらかのポートが
+  # 使われていたら起動しない（片方だけで起動すると、ブラウザが別のサーバーを開くことがある）
+  server = WEBrick::HTTPServer.new(
+    BindAddress: 'localhost',
+    Port: PORT,
+    DocumentRoot: ROOT,
+    Logger: WEBrick::Log.new($stderr, WEBrick::Log::WARN),
+    AccessLog: [],
+    # 編集した .rb や画像がすぐ反映されるよう、ブラウザにキャッシュさせない
+    RequestCallback: ->(_req, res) { res['Cache-Control'] = 'no-store' },
+  )
+rescue Errno::EADDRINUSE
+  abort "ポート #{PORT} は別のサーバーが使っています（PicoDX の開発サーバーなど）。\n" \
+        "そのサーバーを止めるか、PORT=#{PORT + 1} bundle exec ruby script/server のように別のポートで起動してください。"
+end
+
+server.config[:MimeTypes]['rb']   = 'text/plain; charset=utf-8'
+
+puts "http://localhost:#{PORT}"
+trap('INT') { server.shutdown }
+server.start

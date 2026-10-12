@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ヘルシーアドベンチャー</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #111;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* 内部解像度は 1024x700 のまま、画面に収まるよう拡大・縮小する */
+    canvas {
+      display: block;
+      width: min(100vw, calc(100vh * 1024 / 700));
+      height: auto;
+      aspect-ratio: 1024 / 700;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game" width="1024" height="700"></canvas>
+  <!-- PicoDX（CDN）を読み込んでから、ゲームの main.rb を読み込む -->
+  <script type="text/ruby" src="https://cdn.jsdelivr.net/npm/picodx@2.0.0/lib/picodx.rb"></script>
+  <script type="text/ruby" src="main.rb"></script>
+  <!-- PicoRuby.wasm（CDN）。上の text/ruby を順に実行する -->
+  <script src="https://cdn.jsdelivr.net/npm/@picoruby/wasm-wasi@4.0.2/dist/init.iife.js"></script>
+</body>
+</html>
