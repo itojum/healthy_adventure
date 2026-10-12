@@ -2,7 +2,7 @@
 
 require 'webrick'
 
-root = File.expand_path('..', __dir__)
+root = File.expand_path('../web', __dir__)
 port = (ENV['PORT'] || 8080).to_i
 
 server = WEBrick::HTTPServer.new(
