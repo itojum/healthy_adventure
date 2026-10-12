@@ -9,7 +9,7 @@ bgm = Bgm.new(["./page/bgm/selectBGM.wav"] * 3)
 require './page/goal.rb'
 require './page/player_select.rb'
 
-backgroundImage = Image.load('image\background1.png')
+backgroundImage = Image.load('image/background1.png')
 
 Window.width  = 1024
 Window.height = 700
