@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+
+root = File.expand_path('..', __dir__)
+game = File.join(root, 'game')
+web  = File.join(root, 'web')
+
+{ 'image' => 'image', 'page/bgm' => 'page/bgm' }.each do |from, to|
+  src = File.join(game, from)
+  dst = File.join(web, to)
+  FileUtils.rm_rf(dst)
+  FileUtils.mkdir_p(File.dirname(dst))
+  FileUtils.cp_r(src, dst)
+  puts "copied game/#{from} -> web/#{to}"
+end
