@@ -1,6 +1,4 @@
 #!/usr/bin/env ruby
-# 原作の画像と BGM を web/ にコピーする。`npm run build` の前に prebuild として動く。
-# 原作は ./image/... と ./page/bgm/... を読むので、配信する web/ に同じ構成で置く。
 
 require 'fileutils'
 
