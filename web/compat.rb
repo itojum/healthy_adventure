@@ -34,7 +34,6 @@ class Set
   end
 end
 
-# PicoRuby の rand は Range を受け付けないので、Range のときだけ整数に直して元の rand を呼ぶ。
 def rand(*args)
   range = args[0]
   return super unless range.is_a?(Range)
