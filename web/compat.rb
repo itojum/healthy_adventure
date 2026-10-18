@@ -1,8 +1,3 @@
-# PicoRuby に足りない標準機能のうち、原作が使っている分だけを補う。
-# 原作（game/）は DXRuby で動くまま残すので、ここはブラウザ用の入口からだけ読み込む。
-
-# PicoRuby には Set がないので、ゲームで使っている範囲だけを Array で実装する。
-# 原作は each の途中で delete するので、each は複製を回して要素を読み飛ばさないようにする。
 class Set
   def initialize(items = [])
     @items = []
@@ -20,6 +15,7 @@ class Set
     self
   end
 
+  # 複製を回すので、途中で delete しても要素を読み飛ばさない
   def each(&block)
     @items.dup.each(&block)
     self
