@@ -21,6 +21,6 @@
   },
   "homepage": "https://github.com/itojum/healthy_adventure#readme",
   "devDependencies": {
-    "picodx": "^2.1.1"
+    "picodx": "^2.1.2"
   }
 }
