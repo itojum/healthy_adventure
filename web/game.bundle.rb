@@ -44,6 +44,16 @@ class Set
   end
 end
 
+# PicoRuby の rand は Range を受け付けないので、Range のときだけ整数に直して元の rand を呼ぶ。
+def rand(*args)
+  range = args[0]
+  return super unless range.is_a?(Range)
+
+  min  = range.first
+  last = range.exclude_end? ? range.last - 1 : range.last
+  min + super(last - min + 1)
+end
+
 
 # 原作の ranking.rb は Net::HTTP と eval を使うので、ブラウザでは動かない。
 # bundle からは --ignore で外し、ゴール画面が呼ぶ ranking() は通信に失敗したことにする。
