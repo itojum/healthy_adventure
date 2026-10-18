@@ -44,6 +44,14 @@ class Set
   end
 end
 
+
+# 原作の ranking.rb は Net::HTTP と eval を使うので、ブラウザでは動かない。
+# bundle からは --ignore で外し、ゴール画面が呼ぶ ranking() は通信に失敗したことにする。
+# goal() は $server_false が立っていればランキング表示を飛ばす。
+def ranking
+  $server_false = true
+end
+
 # --- main.rb ---
 # --- page/gameover.rb ---
 $dark_image = Image.new(1024, 700, [128, 0, 0, 0]) 
@@ -806,30 +814,7 @@ end
 # bgm = Bgm.new(["./page/bgm/gameBGM.wav", "./page/bgm/selectBGM.wav","./page/bgm/gameBGM.wav"])
 bgm = Bgm.new(["./page/bgm/selectBGM.wav"] * 3)
 # --- page/goal.rb ---
-# --- ranking.rb ---
-require 'net/http'
-require 'uri'
-require 'json'
-
-def ranking()
-  uri = URI.parse("https://7cc9c897-97dc-4bc5-9dc4-1dbef383bee9-00-3n6n427qxadic.spock.replit.dev/post")
-  http = Net::HTTP.new(uri.host, uri.port)
-  http.use_ssl = true
-
-  request = Net::HTTP::Post.new(uri.request_uri)
-  request.set_form_data({ "score" => $score })
-
-  response = http.request(request)
-  if response.body.length > 100
-    puts "サーバーとの通信に失敗しました"
-    $server_false = true
-    return
-  end
-  puts response
-  $ranking_players = eval(response.body.split("\n")[0])
-  $player_name = response.body.split("\n")[1]
-end
-
+# (picodx bundle) ignored: require "./ranking.rb"
 
 
 def goal()
