@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "prebuild": "ruby script/copy_assets",
     "build": "picodx bundle game/main.rb -o web/game.bundle.rb",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
