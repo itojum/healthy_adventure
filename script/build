@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+# game/ のスクリプトと素材を web/ にコピーする。
+# ブラウザでは require './x' がページのディレクトリから読まれるので、
+# web/ に game/ と同じ並びで置く。
+# ranking.rb は net/http を使うので、web/ranking.rb（ブラウザ用）をそのまま使う。
+
+require 'fileutils'
+
+root = File.expand_path('..', __dir__)
+game = File.join(root, 'game')
+web  = File.join(root, 'web')
+
+%w[class init page image].each do |dir|
+  dst = File.join(web, dir)
+  FileUtils.rm_rf(dst)
+  FileUtils.cp_r(File.join(game, dir), dst)
+  puts "copied game/#{dir} -> web/#{dir}"
+end
+
+FileUtils.cp(File.join(game, 'main.rb'), File.join(web, 'main.rb'))
+puts 'copied game/main.rb -> web/main.rb'

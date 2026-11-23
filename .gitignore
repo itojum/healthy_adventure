@@ -1,5 +1,8 @@
 node_modules
 
-# script/copy_assets が game/ からコピーする素材
-/web/image/
+# script/build が game/ からコピーするファイル
+/web/main.rb
+/web/class/
+/web/init/
 /web/page/
+/web/image/
