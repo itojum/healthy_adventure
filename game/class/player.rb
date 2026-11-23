@@ -1,5 +1,5 @@
 require './class/entity.rb'
-require_relative './bullet'
+require './class/bullet.rb'
 class Player < Entity
 
     def initialize(x, y,chara_type)
