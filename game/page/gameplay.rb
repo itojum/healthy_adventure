@@ -13,8 +13,6 @@ def initgame(chara_type)
   $enemys = initEnemy()
   $bullets = Set.new
   
-  # sound = Sound.new( "./page/bgm/selectBGM.wav")  # .wav読み込み
-  # sound.play 
 
   $player = Player.new(5, 10, chara_type)
   $goal = Goal.new(139, 0)

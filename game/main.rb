@@ -2,9 +2,6 @@ require './page/gameover.rb'
 require './page/gameplay.rb'
 require './page/home.rb'
 
-require"./class/bgm.rb"
-# bgm = Bgm.new(["./page/bgm/gameBGM.wav", "./page/bgm/selectBGM.wav","./page/bgm/gameBGM.wav"])
-bgm = Bgm.new(["./page/bgm/selectBGM.wav"] * 3)
 require './page/goal.rb'
 require './page/player_select.rb'
 
@@ -37,17 +34,6 @@ Window.loop do
         $page = 1
     end
   when 1
-
-    bgm.set_bgm($page)
-   # p "after set BGM"
-    if bgm.playing?
-
-    else
-     # p "BGM"
-    bgm.play
-    end
-
-
     chara_type=p_select()
     initgame(chara_type)
     $page=2
